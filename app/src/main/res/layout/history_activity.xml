@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".HistoryActivity">
+
+
+    <ListView
+        android:id="@+id/historyListView"
+        android:layout_width="match_parent"
+        android:textColor="@color/teal_200"
+        android:layout_height="634dp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="93dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="30dp"
+            android:onClick="onClickBack"
+            android:textColor="@color/black"
+            app:srcCompat="@drawable/abc_vector_test" />
+
+        <Button
+            android:id="@+id/Clear"
+            android:layout_width="95dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:text="Clear"
+            android:textColor="@color/white" />
+    </RelativeLayout>
+
+
+</LinearLayout>
