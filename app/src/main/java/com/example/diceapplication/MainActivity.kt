@@ -1,96 +1,164 @@
 package com.example.diceapplication
 
-import android.content.res.Configuration
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Toast
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.history_activity.*
+import android.widget.ImageView
+import android.widget.LinearLayout
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlinx.android.synthetic.main.activity_main.*
+import java.io.Serializable
 
 class MainActivity : AppCompatActivity() {
 
-    private val TAG: String = "xyz"
+    val HISTORY_WAS_CLEARED = 2
+    val GET_HISTORY = 1
 
-    // mapping from 1..6 to drawables, the first index is unused
-    private val diceId = intArrayOf(0, R.drawable.dice1,
-            R.drawable.dice2,
-            R.drawable.dice3,
-            R.drawable.dice4,
-            R.drawable.dice5,
-            R.drawable.dice6)
+    var history = ArrayList<BEDiceRoll>()
+    val dicePictures = arrayOf(0, R.drawable.dice1, R.drawable.dice2, R.drawable.dice3,
+            R.drawable.dice4, R.drawable.dice5, R.drawable.dice6)
+    val mGenerator = Random()
 
-    private val mRandomGenerator = Random()
+    var totalDices: Int = 2
+    val firstList = arrayListOf(1,1,1,1,1,1,1)
+    var currentDices = ArrayList<Int>()
 
-    private val mHistory = mutableListOf<Pair<Int, Int>>()
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putSerializable("history", history)
+        outState.putInt("totalDices", totalDices)
+        outState.putIntegerArrayList("currentDices", currentDices)
+
+        super.onSaveInstanceState(outState)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        btnRoll.setOnClickListener{ v -> onClickRoll()}
-        imgDice1.setOnClickListener { v -> onClickRoll() }
-        imgDice2.setOnClickListener { v -> onClickRoll() }
-        imgDice3.setOnClickListener { v-> onClickRoll() }
-        imgDice4.setOnClickListener { v-> onClickRoll() }
-        imgDice5.setOnClickListener { v-> onClickRoll() }
-        imgDice6.setOnClickListener { v-> onClickRoll() }
-        btnClear.setOnClickListener { v -> onClickClear() }
-        Log.d(TAG, "OnCreate")
 
-        if(savedInstanceState !=null){
-            Log.d(TAG, "The saved state is not null")
-            val history = savedInstanceState.getSerializable("History") as Array<Pair<Int, Int>>
-            history.forEach{ p -> mHistory.add(p)}
-            updateHistory()
-            if(mHistory.size > 0)
-                updateDicesWith(mHistory[mHistory.size-1])
+        if (savedInstanceState != null) {
+            val totalDicesNew = savedInstanceState.getInt("totalDices")
+            val historyList = savedInstanceState.getSerializable("history") as ArrayList<BEDiceRoll>
+            val currentDicesList = savedInstanceState.getIntegerArrayList("currentDices") as ArrayList<Int>
+
+            history = historyList
+            totalDices = totalDicesNew
+            currentDices = currentDicesList
+
+            //Makes the dices show the dices that were last rolled.
+            createDices(totalDices, currentDices)
+
+            updateDiceCount()
+        }
+        else {
+            //Sets the first dices
+            for (i in 1..totalDices)
+            {
+                currentDices.add(1)
+            }
+
+            createDices(totalDices, firstList)
+
+            updateDiceCount()
+        }
+    }
+
+    //Takes an amount and a list of indexes for the picture list and adds them to the main gridlayout
+    private fun createDices(dicesToBeAdded: Int, dicePicture: ArrayList<Int>) {
+
+        for (i in 1..dicesToBeAdded) {
+            val imgView = ImageView(this)
+
+            val lp = LinearLayout.LayoutParams(300, 300)
+            lp.setMargins(5,5,5,5)
+            imgView.layoutParams = lp
+
+            imgView.setBackgroundResource(dicePictures[dicePicture[i-1]])
+
+            glDices.addView(imgView)
+        }
+    }
+
+    //Updates the counter on screen with the new amount of dices
+    fun updateDiceCount() {
+        tvDiceCount.text = totalDices.toString()
+    }
+
+    //Adds a dice to the gridLayout if the limit has not been reached
+    fun onClickMoreDices(view: View) {
+        if(totalDices != 6)
+        {
+            totalDices++
+            createDices(1, firstList)
+            currentDices.add(1)
         }
 
+        updateDiceCount()
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        Log.d(TAG, "History saved")
-        outState.putSerializable("history", mHistory.toTypedArray())
+    //Removes a dice from the gridLayout if the limit has not been reached
+    fun onClickLessDices(view: View) {
+        if(totalDices != 1)
+        {
+            totalDices--
+            glDices.removeViewAt(totalDices)
 
+            currentDices.removeAt(currentDices.size-1)
+        }
+
+        updateDiceCount()
     }
 
-    private fun updateDicesWith(p: Pair<Int, Int>) {
-        imgDice1.setImageResource( diceId[p.first] )
-        imgDice2.setImageResource( diceId[p.second] )
+    //Gets a random number for each dice, and changes the pictures of the dices to reflect the numbers
+    fun onClickRoll(view: View) {
+        currentDices.clear()
+
+        val listOfDiceRolls = ArrayList<Int>()
+        val diceNumbersInGrid = totalDices-1
+
+        for (i in 0..diceNumbersInGrid)
+        {
+            val randomNumber = mGenerator.nextInt(6)+1
+
+            val currentImgView = glDices.getChildAt(i)
+
+            with (currentImgView as ImageView)
+            {
+                currentImgView.setBackgroundResource(dicePictures[randomNumber])
+            }
+
+            listOfDiceRolls.add(randomNumber)
+            currentDices.add(randomNumber)
+        }
+
+        //Adds the roll to the history
+        val diceRoll = BEDiceRoll(listOfDiceRolls, Calendar.getInstance().time)
+        history.add(diceRoll)
     }
 
-    private fun updateHistory() {
-        var s = "Update"
-        mHistory.forEach { p ->  val e1 = p.first; val e2 = p.second; s += "$e1 - $e2 \n" }
-        //historyListView.text = s
+    //Sends the user and history list to the HistoryActivity
+    fun onClickHistory(view: View) {
+        val intent = Intent(this, HistoryActivity::class.java)
+        intent.putExtra("history", history as Serializable)
+        startActivityForResult(intent, GET_HISTORY)
     }
 
+    //Checks if the history list has been cleared in the HistoryActivity
+    //If it is cleared, make sure the dices look like the last rolled dices
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == GET_HISTORY)
+        {
+            if(resultCode == HISTORY_WAS_CLEARED)
+            {
+                history.clear()
+                glDices.removeAllViews()
+                createDices(totalDices, currentDices)
 
-    private fun onClickRoll() {
-        val e1 = mRandomGenerator.nextInt(6) + 1
-        val e2 = mRandomGenerator.nextInt(6) + 1
-
-        val p = Pair(e1,e2)
-        // update dices
-        imgDice1.setImageResource( diceId[e1] )
-        imgDice2.setImageResource( diceId[e2] )
-
-        //update history
-        mHistory.add(p)
-
-        updateDicesWith(p)
-        if (mHistory.size > 5) mHistory.removeAt(0)
-        updateHistory()
-        Log.d(TAG, "Roll")
+                println("History cleared")
+            }
+        }
     }
-
-    private fun onClickClear() {
-        Log.d(TAG, "Clear")
-        mHistory.clear()
-        updateHistory()
-    }
-
 }

@@ -8,48 +8,48 @@
     android:background="@color/white">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/llHistory"
+        android:layout_width="420dp"
         android:layout_height="match_parent"
-        android:layout_above="@+id/llOptions"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:background="@color/teal_700">
+        android:layout_marginTop="25dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginBottom="25dp"
+        android:orientation="horizontal"
+        android:background="@color/teal_700"
+        >
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            />
-
+            android:scrollbars="vertical"/>
     </LinearLayout>
-
 
     <LinearLayout
         android:id="@+id/llOptions"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:gravity="center"
-        android:layout_alignParentBottom="true">
-
-        <Button
-            android:layout_width="100dp"
-            android:layout_height="60dp"
-            android:layout_marginEnd="70dp"
-            android:backgroundTint="@color/purple_500"
-            android:onClick="onClickBack"
-            android:text="back" />
+        android:layout_toEndOf="@+id/llHistory"
+        android:layout_alignParentEnd="true">
 
         <Button
             android:layout_width="150dp"
             android:layout_height="60dp"
-            android:backgroundTint="@color/purple_500"
             android:onClick="onClickClear"
+            android:backgroundTint="@color/purple_500"
             android:text="clear"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
-    </LinearLayout>
+            android:layout_marginBottom="25dp"
+            android:textSize="20sp"
+            android:textColor="@color/white"/>
 
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:backgroundTint="@color/purple_500"
+            android:layout_marginTop="25dp"
+            android:onClick="onClickBack"
+            android:text="Back"/>
+    </LinearLayout>
 </RelativeLayout>
